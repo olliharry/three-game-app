@@ -1,0 +1,16 @@
+physics Game
+
+ball
+
+obstacles
+
+proceduraly generated/infinite run
+
+ball can jump
+
+can move from side to side
+
+Create obsacle spawner that gets more difficult over time. 
+More often and faster
+
+
