@@ -6,6 +6,7 @@ import { createBallgraphics } from "./ball";
 import { createFloorgraphics } from "./floor";
 import { createDirectionalLight } from "./directionalLight";
 import { createObstaclegraphics } from "./obstacle";
+import { Old_Standard_TT } from "next/font/google";
 
 interface Obstacle {
   mesh: THREE.Mesh;
@@ -21,8 +22,8 @@ const Scene: React.FC = () => {
     let oldTime: number = 0.1;
     function createObstacle(elaspedTime: number) {
       const x = Math.random() * (4 - -4) + -4; // Random x position
-      const y = Math.random() * (2.5 - 0.5) + 0.5; // Random y position (height)
-      const z = -40; // Random z position
+      const y = Math.random() * (3 - 0.5) + 0.5; // Random y position (height)
+      const z = -70; // Random z position
 
       // Create graphical obstacle
       const obstacle = createObstaclegraphics(x, y, z);
@@ -37,7 +38,8 @@ const Scene: React.FC = () => {
       obstacleBody.material = obstacleMat;
       world.addBody(obstacleBody);
 
-      obstacleBody.velocity.z = elaspedTime * 2;
+      obstacleBody.velocity.z = Math.random() * (15 - 5) + 5;
+
       obstacles.push({ mesh: obstacle, body: obstacleBody });
       const obstacleContactMaterial = new CANNON.ContactMaterial(
         obstacleMat, // Material A
@@ -228,7 +230,8 @@ const Scene: React.FC = () => {
       world.step(deltaTime); // Step the physics simulation
       if (clock.elapsedTime >= oldTime) {
         createObstacle(clock.getElapsedTime());
-        oldTime++;
+        oldTime = oldTime * 0.99 + 1;
+        console.log(oldTime);
       }
 
       // Update positions of Three.js objects based on Cannon.js simulation
