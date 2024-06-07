@@ -1,16 +1,15 @@
-physics Game
+Create visual lines of where to play
 
-ball
+Create score counter
 
-obstacles
+Create play button
+- Pause button.
 
-proceduraly generated/infinite run
+Death Screen
+Start Screen
 
-ball can jump
+Create Death trigger
 
-can move from side to side
-
-Create obsacle spawner that gets more difficult over time. 
-More often and faster
+apply texture to ball
 
 

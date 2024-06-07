@@ -6,7 +6,7 @@ import { createBallgraphics } from "./ball";
 import { createFloorgraphics } from "./floor";
 import { createDirectionalLight } from "./directionalLight";
 import { createObstaclegraphics } from "./obstacle";
-import { Old_Standard_TT } from "next/font/google";
+import { createFloorBoundarygraphics } from "./floorBoundary";
 
 interface Obstacle {
   mesh: THREE.Mesh;
@@ -23,7 +23,7 @@ const Scene: React.FC = () => {
     function createObstacle(elaspedTime: number) {
       const x = Math.random() * (4 - -4) + -4; // Random x position
       const y = Math.random() * (3 - 0.5) + 0.5; // Random y position (height)
-      const z = -70; // Random z position
+      const z = -100; // Random z position
 
       // Create graphical obstacle
       const obstacle = createObstaclegraphics(x, y, z);
@@ -38,7 +38,7 @@ const Scene: React.FC = () => {
       obstacleBody.material = obstacleMat;
       world.addBody(obstacleBody);
 
-      obstacleBody.velocity.z = Math.random() * (15 - 5) + 5;
+      obstacleBody.velocity.z = Math.random() * (20 - 5) + 5;
 
       obstacles.push({ mesh: obstacle, body: obstacleBody });
       const obstacleContactMaterial = new CANNON.ContactMaterial(
@@ -79,7 +79,7 @@ const Scene: React.FC = () => {
       0.1,
       1000
     );
-    const renderer = new THREE.WebGLRenderer();
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
     mountRef.current.appendChild(renderer.domElement);
@@ -93,6 +93,12 @@ const Scene: React.FC = () => {
     const ball = createBallgraphics();
     scene.add(ball);
 
+    //Create Floor Boundary graphic
+    const floorBoundaryMax = createFloorBoundarygraphics(-3);
+    const floorBoundaryMin = createFloorBoundarygraphics(3);
+    scene.add(floorBoundaryMax);
+    scene.add(floorBoundaryMin);
+
     // Create Cannon.js ball shape and body
     const ballShape = new CANNON.Sphere(ballRadius);
     const ballBody = new CANNON.Body({ mass: 1, shape: ballShape });
@@ -105,7 +111,7 @@ const Scene: React.FC = () => {
     const floor = createFloorgraphics();
     scene.add(floor);
 
-    const floorShape = new CANNON.Box(new CANNON.Vec3(4, 100, 1));
+    const floorShape = new CANNON.Box(new CANNON.Vec3(4, 200, 1));
     const floorBody = new CANNON.Body({ mass: 0, shape: floorShape });
     const floorMat = new CANNON.Material("ball");
     floorBody.material = floorMat;
@@ -167,7 +173,7 @@ const Scene: React.FC = () => {
           ballBody.velocity.x = 0;
         }
         //ballBody.applyForce(new CANNON.Vec3(-5, 0, 0), ballBody.position);
-        ballBody.velocity.x = -3;
+        ballBody.velocity.x = -2;
       }
     };
 
@@ -177,7 +183,7 @@ const Scene: React.FC = () => {
           ballBody.velocity.x = 0;
         }
         //ballBody.applyForce(new CANNON.Vec3(+5, 0, 0), ballBody.position);
-        ballBody.velocity.x = +3;
+        ballBody.velocity.x = +2;
       }
     };
 
@@ -187,7 +193,7 @@ const Scene: React.FC = () => {
           ballBody.velocity.z = 0;
         }
         //ballBody.applyForce(new CANNON.Vec3(-5, 0, 0), ballBody.position);
-        ballBody.velocity.z = -3;
+        ballBody.velocity.z = -2;
       }
     };
 
@@ -197,7 +203,7 @@ const Scene: React.FC = () => {
           ballBody.velocity.z = 0;
         }
         //ballBody.applyForce(new CANNON.Vec3(+5, 0, 0), ballBody.position);
-        ballBody.velocity.z = +3;
+        ballBody.velocity.z = +2;
       }
     };
 
@@ -216,7 +222,18 @@ const Scene: React.FC = () => {
       obstacles.forEach(({ mesh, body }) => {
         if (body.position.y < -2 || body.position.z > 5) {
           removeObstacle(mesh, body);
+          return;
         }
+        const speed = Math.abs(body.velocity.z);
+
+        const color = new THREE.Color();
+        const hue = THREE.MathUtils.mapLinear(speed, 0, 10, 0.66, 0);
+        color.setHSL(hue, 1, 0.5);
+        mesh.material = new THREE.MeshLambertMaterial({
+          color,
+          side: THREE.DoubleSide,
+        });
+
         mesh.position.copy(body.position);
         mesh.quaternion.copy(body.quaternion);
       });
