@@ -7,6 +7,7 @@ import { createFloorgraphics } from "./floor";
 import { createDirectionalLight } from "./directionalLight";
 import { createObstaclegraphics } from "./obstacle";
 import { createFloorBoundarygraphics } from "./floorBoundary";
+import StartScreen from "./startScreen/startScreen";
 
 interface Obstacle {
   mesh: THREE.Mesh;
@@ -16,6 +17,8 @@ interface Obstacle {
 const Scene: React.FC = () => {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const [isJumping, setIsJumping] = useState(false);
+  const [showStartScreen, setShowStartScreen] = useState(true);
+  const [isPaused, setIsPaused] = useState(true);
   const obstacles: Obstacle[] = [];
 
   useEffect(() => {
@@ -128,7 +131,7 @@ const Scene: React.FC = () => {
 
       {
         restitution: 0.5, // Adjust restitution coefficient as needed
-        friction: 1, // Adjust friction coefficient as needed
+        friction: 10000, // Adjust friction coefficient as needed
       }
     );
     world.addContactMaterial(ballContactMaterial);
@@ -248,7 +251,6 @@ const Scene: React.FC = () => {
       if (clock.elapsedTime >= oldTime) {
         createObstacle(clock.getElapsedTime());
         oldTime = oldTime * 0.99 + 1;
-        console.log(oldTime);
       }
 
       // Update positions of Three.js objects based on Cannon.js simulation
@@ -260,8 +262,9 @@ const Scene: React.FC = () => {
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
     };
-
-    animate();
+    if (!isPaused) {
+      animate();
+    }
 
     // Clean up on component unmount
     return () => {
@@ -269,9 +272,21 @@ const Scene: React.FC = () => {
         mountRef.current.removeChild(renderer.domElement);
       }
     };
-  }, []);
+  }, [isPaused]);
 
-  return <div ref={mountRef}></div>;
+  //return <div ref={mountRef}></div>;
+
+  const handleStart = () => {
+    setShowStartScreen(false);
+    setIsPaused(false);
+    //start game
+  };
+  return (
+    <div>
+      {showStartScreen && <StartScreen onStart={handleStart} />}
+      <div ref={mountRef} id="gameContainer" />
+    </div>
+  );
 };
 
 export default Scene;
