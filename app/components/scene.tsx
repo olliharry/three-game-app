@@ -8,6 +8,7 @@ import { createDirectionalLight } from "./directionalLight";
 import { createObstaclegraphics } from "./obstacle";
 import { createFloorBoundarygraphics } from "./floorBoundary";
 import StartScreen from "./startScreen/startScreen";
+import checkIsDead from "../utils/gameUtils";
 
 interface Obstacle {
   mesh: THREE.Mesh;
@@ -151,7 +152,6 @@ const Scene: React.FC = () => {
     // Event listener for spacebar keydown event
     const spaceDown = (event: KeyboardEvent) => {
       if (event.code === "Space" && !isJumping && ballBody.position.y <= 2) {
-        console.log("down");
         // Apply an impulse to the ball's body in the upward direction
         ballBody.velocity.y = 0;
         ballBody.applyImpulse(new CANNON.Vec3(0, 6, 0), ballBody.position);
@@ -164,7 +164,6 @@ const Scene: React.FC = () => {
     // Event listener for spacebar keyup event
     const spaceUp = (event: KeyboardEvent) => {
       if (event.code === "Space") {
-        console.log("up");
         // Reset the jumping flag when the spacebar is released
         setIsJumping(false);
       }
@@ -245,10 +244,13 @@ const Scene: React.FC = () => {
     // Animation loop
     const clock = new THREE.Clock();
     const animate = () => {
+      if (isPaused) {
+        return;
+      }
       const deltaTime = clock.getDelta();
-
       world.step(deltaTime); // Step the physics simulation
-      if (clock.elapsedTime >= oldTime) {
+
+      if (clock.elapsedTime >= oldTime && !showStartScreen) {
         createObstacle(clock.getElapsedTime());
         oldTime = oldTime * 0.99 + 1;
       }
@@ -261,10 +263,12 @@ const Scene: React.FC = () => {
       renderer.shadowMap.autoUpdate = true;
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
+
+      if (checkIsDead(ball.position)) {
+        setIsPaused(true);
+      }
     };
-    if (!isPaused) {
-      animate();
-    }
+    animate();
 
     // Clean up on component unmount
     return () => {
@@ -272,7 +276,7 @@ const Scene: React.FC = () => {
         mountRef.current.removeChild(renderer.domElement);
       }
     };
-  }, [isPaused]);
+  }, [isPaused, showStartScreen]);
 
   //return <div ref={mountRef}></div>;
 

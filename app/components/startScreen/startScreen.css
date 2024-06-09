@@ -4,8 +4,8 @@
 .overlay {
   position: fixed;
   width: 100vw;
-  height: 50vh;
-  background-color: #dc5f00;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.8);
 }
 
 .startScreen {
@@ -24,6 +24,7 @@
 .startButton {
   font-size: 16px;
   font-weight: 1000;
+
   cursor: pointer;
   background-color: #373a40;
   border-radius: 10px;

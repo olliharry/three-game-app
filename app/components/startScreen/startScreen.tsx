@@ -7,7 +7,7 @@ interface StartScreenProps {
 
 const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
   return (
-    <div className="overlayy">
+    <div className="overlay">
       <div className="startScreen">
         <h1>Welcome to awd</h1>
         <p>Use arrow keys to move and spacebar to jump.</p>
