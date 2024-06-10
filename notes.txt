@@ -1,12 +1,13 @@
-Create visual lines of where to play
+
 
 Create score counter
 
 Create play button
 - Pause button.
 
-Death Screen
-Start Screen
+Death Screen!
+Reset function
+
 
 Create Death trigger
 

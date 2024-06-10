@@ -9,6 +9,7 @@ import { createObstaclegraphics } from "./obstacle";
 import { createFloorBoundarygraphics } from "./floorBoundary";
 import StartScreen from "./startScreen/startScreen";
 import checkIsDead from "../utils/gameUtils";
+import DeathScreen from "./deathScreen/deathScreen";
 
 interface Obstacle {
   mesh: THREE.Mesh;
@@ -20,7 +21,10 @@ const Scene: React.FC = () => {
   const [isJumping, setIsJumping] = useState(false);
   const [showStartScreen, setShowStartScreen] = useState(true);
   const [isPaused, setIsPaused] = useState(true);
+  const [isAlive, setIsAlive] = useState(true);
   const obstacles: Obstacle[] = [];
+  const ball = useRef<THREE.Mesh | null>(null);
+  const ballBody = useRef<CANNON.Body | null>(null);
 
   useEffect(() => {
     let oldTime: number = 0.1;
@@ -93,9 +97,10 @@ const Scene: React.FC = () => {
     world.gravity.set(0, -10, 0); // Set gravity
 
     // Create geometry for the ball
-    const ballRadius = 0.5;
-    const ball = createBallgraphics();
-    scene.add(ball);
+
+    ball.current = createBallgraphics();
+
+    scene.add(ball.current);
 
     //Create Floor Boundary graphic
     const floorBoundaryMax = createFloorBoundarygraphics(-3);
@@ -104,12 +109,12 @@ const Scene: React.FC = () => {
     scene.add(floorBoundaryMin);
 
     // Create Cannon.js ball shape and body
-    const ballShape = new CANNON.Sphere(ballRadius);
-    const ballBody = new CANNON.Body({ mass: 1, shape: ballShape });
-    ballBody.position.set(0, 1, 0); // Initial position
+    const ballShape = new CANNON.Sphere(0.5);
+    ballBody.current = new CANNON.Body({ mass: 1, shape: ballShape });
+    ballBody.current.position.set(0, 1, 0); // Initial position
     const ballMat = new CANNON.Material("ball");
-    ballBody.material = ballMat;
-    world.addBody(ballBody);
+    ballBody.current.material = ballMat;
+    world.addBody(ballBody.current);
 
     // Create geometry and material for the floor
     const floor = createFloorgraphics();
@@ -151,14 +156,23 @@ const Scene: React.FC = () => {
 
     // Event listener for spacebar keydown event
     const spaceDown = (event: KeyboardEvent) => {
-      if (event.code === "Space" && !isJumping && ballBody.position.y <= 2) {
-        // Apply an impulse to the ball's body in the upward direction
-        ballBody.velocity.y = 0;
-        ballBody.applyImpulse(new CANNON.Vec3(0, 6, 0), ballBody.position);
+      if (ballBody.current)
+        if (
+          event.code === "Space" &&
+          !isJumping &&
+          ballBody.current.position.y <= 2 &&
+          ballBody.current
+        ) {
+          // Apply an impulse to the ball's body in the upward direction
+          ballBody.current.velocity.y = 0;
+          ballBody.current.applyImpulse(
+            new CANNON.Vec3(0, 6, 0),
+            ballBody.current.position
+          );
 
-        // Set isJumping to true to prevent multiple jumps in quick succession
-        setIsJumping(true);
-      }
+          // Set isJumping to true to prevent multiple jumps in quick succession
+          setIsJumping(true);
+        }
     };
 
     // Event listener for spacebar keyup event
@@ -170,42 +184,42 @@ const Scene: React.FC = () => {
     };
 
     const ADown = (event: KeyboardEvent) => {
-      if (event.code === "KeyA") {
-        if (ballBody.velocity.x > 1) {
-          ballBody.velocity.x = 0;
+      if (event.code === "KeyA" && ballBody.current) {
+        if (ballBody.current.velocity.x > 1) {
+          ballBody.current.velocity.x = 0;
         }
         //ballBody.applyForce(new CANNON.Vec3(-5, 0, 0), ballBody.position);
-        ballBody.velocity.x = -2;
+        ballBody.current.velocity.x = -2;
       }
     };
 
     const DDown = (event: KeyboardEvent) => {
-      if (event.code === "KeyD") {
-        if (ballBody.velocity.x < 1) {
-          ballBody.velocity.x = 0;
+      if (event.code === "KeyD" && ballBody.current) {
+        if (ballBody.current.velocity.x < 1) {
+          ballBody.current.velocity.x = 0;
         }
         //ballBody.applyForce(new CANNON.Vec3(+5, 0, 0), ballBody.position);
-        ballBody.velocity.x = +2;
+        ballBody.current.velocity.x = +2;
       }
     };
 
     const WDown = (event: KeyboardEvent) => {
-      if (event.code === "KeyW") {
-        if (ballBody.velocity.x > 1) {
-          ballBody.velocity.z = 0;
+      if (event.code === "KeyW" && ballBody.current) {
+        if (ballBody.current.velocity.x > 1) {
+          ballBody.current.velocity.z = 0;
         }
         //ballBody.applyForce(new CANNON.Vec3(-5, 0, 0), ballBody.position);
-        ballBody.velocity.z = -2;
+        ballBody.current.velocity.z = -2;
       }
     };
 
     const SDown = (event: KeyboardEvent) => {
-      if (event.code === "KeyS") {
-        if (ballBody.velocity.x < 1) {
-          ballBody.velocity.z = 0;
+      if (event.code === "KeyS" && ballBody.current) {
+        if (ballBody.current.velocity.x < 1) {
+          ballBody.current.velocity.z = 0;
         }
         //ballBody.applyForce(new CANNON.Vec3(+5, 0, 0), ballBody.position);
-        ballBody.velocity.z = +2;
+        ballBody.current.velocity.z = +2;
       }
     };
 
@@ -240,6 +254,13 @@ const Scene: React.FC = () => {
         mesh.quaternion.copy(body.quaternion);
       });
     }
+    const handleRestart = () => {
+      //ball.position.x = 0;
+      //ball.position.y = 0;
+      //ball.position.z = 0;
+
+      setIsAlive(true);
+    };
 
     // Animation loop
     const clock = new THREE.Clock();
@@ -256,16 +277,20 @@ const Scene: React.FC = () => {
       }
 
       // Update positions of Three.js objects based on Cannon.js simulation
-      ball.position.copy(ballBody.position);
-      ball.quaternion.copy(ballBody.quaternion);
+      if (ball.current && ballBody.current) {
+        ball.current.position.copy(ballBody.current.position);
+        ball.current.quaternion.copy(ballBody.current.quaternion);
+      }
 
       updatePhysics(deltaTime);
       renderer.shadowMap.autoUpdate = true;
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
 
-      if (checkIsDead(ball.position)) {
+      if (ball.current && checkIsDead(ball.current.position)) {
+        clock.elapsedTime = 0;
         setIsPaused(true);
+        setIsAlive(false);
       }
     };
     animate();
@@ -276,17 +301,28 @@ const Scene: React.FC = () => {
         mountRef.current.removeChild(renderer.domElement);
       }
     };
-  }, [isPaused, showStartScreen]);
-
-  //return <div ref={mountRef}></div>;
+  }, [isPaused, showStartScreen, isAlive]);
 
   const handleStart = () => {
     setShowStartScreen(false);
     setIsPaused(false);
-    //start game
   };
+  const handleRestart = () => {
+    if (ball.current && ballBody.current) {
+      ball.current.position.z = 0;
+      ball.current.position.x = 0;
+      ball.current.position.y = 0;
+      ballBody.current.position.z = 0;
+      ballBody.current.position.x = 0;
+      ballBody.current.position.y = 0;
+    }
+    setIsAlive(true);
+    setIsPaused(false);
+  };
+
   return (
     <div>
+      {!isAlive && <DeathScreen onRestart={handleRestart} />}
       {showStartScreen && <StartScreen onStart={handleStart} />}
       <div ref={mountRef} id="gameContainer" />
     </div>
