@@ -10,6 +10,7 @@ import { createFloorBoundarygraphics } from "./floorBoundary";
 import StartScreen from "./startScreen/startScreen";
 import checkIsDead from "../utils/gameUtils";
 import DeathScreen from "./deathScreen/deathScreen";
+import ScoreCounter from "./scoreCounter/scoreCounter";
 
 interface Obstacle {
   mesh: THREE.Mesh;
@@ -22,6 +23,7 @@ const Scene: React.FC = () => {
   const [showStartScreen, setShowStartScreen] = useState(true);
   const [isPaused, setIsPaused] = useState(true);
   const [isAlive, setIsAlive] = useState(true);
+  const [score, setScore] = useState(0);
   const obstacles: Obstacle[] = [];
   const ball = useRef<THREE.Mesh | null>(null);
   const ballBody = useRef<CANNON.Body | null>(null);
@@ -254,13 +256,6 @@ const Scene: React.FC = () => {
         mesh.quaternion.copy(body.quaternion);
       });
     }
-    const handleRestart = () => {
-      //ball.position.x = 0;
-      //ball.position.y = 0;
-      //ball.position.z = 0;
-
-      setIsAlive(true);
-    };
 
     // Animation loop
     const clock = new THREE.Clock();
@@ -286,6 +281,7 @@ const Scene: React.FC = () => {
       renderer.shadowMap.autoUpdate = true;
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
+      setScore(obstacles.length);
 
       if (ball.current && checkIsDead(ball.current.position)) {
         clock.elapsedTime = 0;
@@ -293,6 +289,7 @@ const Scene: React.FC = () => {
         setIsAlive(false);
       }
     };
+
     animate();
 
     // Clean up on component unmount
@@ -308,21 +305,14 @@ const Scene: React.FC = () => {
     setIsPaused(false);
   };
   const handleRestart = () => {
-    if (ball.current && ballBody.current) {
-      ball.current.position.z = 0;
-      ball.current.position.x = 0;
-      ball.current.position.y = 0;
-      ballBody.current.position.z = 0;
-      ballBody.current.position.x = 0;
-      ballBody.current.position.y = 0;
-    }
     setIsAlive(true);
     setIsPaused(false);
   };
 
   return (
     <div>
-      {!isAlive && <DeathScreen onRestart={handleRestart} />}
+      {!isAlive && <DeathScreen onRestart={handleRestart} score={score} />}
+      {isAlive && !showStartScreen && <ScoreCounter score={score} />}
       {showStartScreen && <StartScreen onStart={handleStart} />}
       <div ref={mountRef} id="gameContainer" />
     </div>

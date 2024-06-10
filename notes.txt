@@ -1,15 +1,15 @@
 
 
-Create score counter
 
-Create play button
+
+
 - Pause button.
 
-Death Screen!
-Reset function
 
 
-Create Death trigger
+
+
+
 
 apply texture to ball
 
