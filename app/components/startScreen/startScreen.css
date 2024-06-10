@@ -1,31 +1,85 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-.overlay {
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap");
+
+/* Overlay */
+.startScreenOverlay {
   position: fixed;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.8);
+  background: rgb(0, 0, 0);
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(9, 9, 121, 1) 99%,
+    rgba(0, 212, 255, 1) 100%
+  );
+  background-size: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* Start Screen Container */
 .startScreen {
-  position: fixed;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding: 20px;
   border-radius: 10px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: #686d76;
+  background-color: #2d2f36;
+  color: #fff;
+  text-align: center;
+
+  animation: fadeIn 1s ease-in-out;
 }
 
-.startButton {
-  font-size: 16px;
-  font-weight: 1000;
+/* Keyframes for Fade-in Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
 
+    transform: translate(-0%, -10%);
+  }
+  to {
+    opacity: 1;
+
+    transform: translate(-0%, -0%);
+  }
+}
+
+/* Title and Text */
+.startScreen h1 {
+  font-family: "Roboto", sans-serif;
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.startScreen p {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+}
+
+/* Start Button */
+.startButton {
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 10px 20px;
   cursor: pointer;
-  background-color: #373a40;
+  background-color: #ff4757;
+  color: #fff;
+  border: none;
   border-radius: 10px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* Button Hover and Active Effects */
+.startButton:hover {
+  background-color: #ff6b81;
+}
+
+.startButton:active {
+  transform: scale(0.95);
 }

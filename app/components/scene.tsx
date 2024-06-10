@@ -21,7 +21,8 @@ const Scene: React.FC = () => {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const [isJumping, setIsJumping] = useState(false);
   const [showStartScreen, setShowStartScreen] = useState(true);
-  const [isPaused, setIsPaused] = useState(true);
+  //const [isPaused, setIsPaused] = useState(true);
+  const isPaused = useRef<boolean>(true);
   const [isAlive, setIsAlive] = useState(true);
   const [score, setScore] = useState(0);
   const obstacles: Obstacle[] = [];
@@ -260,7 +261,7 @@ const Scene: React.FC = () => {
     // Animation loop
     const clock = new THREE.Clock();
     const animate = () => {
-      if (isPaused) {
+      if (isPaused.current) {
         return;
       }
       const deltaTime = clock.getDelta();
@@ -285,11 +286,10 @@ const Scene: React.FC = () => {
 
       if (ball.current && checkIsDead(ball.current.position)) {
         clock.elapsedTime = 0;
-        setIsPaused(true);
+        isPaused.current = true;
         setIsAlive(false);
       }
     };
-
     animate();
 
     // Clean up on component unmount
@@ -298,15 +298,15 @@ const Scene: React.FC = () => {
         mountRef.current.removeChild(renderer.domElement);
       }
     };
-  }, [isPaused, showStartScreen, isAlive]);
+  }, [showStartScreen, isAlive, isPaused]);
 
   const handleStart = () => {
     setShowStartScreen(false);
-    setIsPaused(false);
+    isPaused.current = false;
   };
   const handleRestart = () => {
     setIsAlive(true);
-    setIsPaused(false);
+    isPaused.current = false;
   };
 
   return (
