@@ -9,7 +9,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
   return (
     <div className="overlay">
       <div className="startScreen">
-        <h1>Welcome to GAMENAME</h1>
+        <h1>Welcome to Obstacle Dash</h1>
         <p>Use WASD keys to move and spacebar to jump.</p>
         <p>Dodge the cubes.</p>
         <p>Stay on the platform in between the green lines.</p>

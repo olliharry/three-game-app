@@ -1,16 +1,10 @@
 
 
 
-
-
-- Pause button.
-
-
-
-
-
-
-
 apply texture to ball
+
+make menus look nicer
+
+
 
 
